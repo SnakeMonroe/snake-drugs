@@ -1,84 +1,129 @@
-# Snake Drugs - Core Drug System for RSG
+# Snake Drugs - Drug System for RSG v1.0.0
 
-## Description
+## 📦 Description
 
-This resource provides a core drug system for the RedM server, allowing players to gather ingredients, process them into drugs, and potentially distribute or consume them.
+A modular and configurable drug system for RedM that enables players to gather, process, and sell drugs like Opium. Designed for easy expansion and seamless integration with major frameworks.
 
-## Implemented Features
+---
 
--   Opium processing
--   Drug selling
+## 🚀 Features
 
-## Configuration
+- 🔬 Ingredient-based drug crafting  
+- 🧪 Configurable processing zones with `ox_target`  
+- 💸 Drug selling system with cooldowns and NPC interaction  
+- 🚨 Law enforcement alerts with blips and notifications  
+- ⚙️ Tool degradation and durability system  
 
-The drug system is configured through the `config.lua` file. This file defines the available drugs, their ingredients, output, and processing locations.
+---
 
-### `config.lua`
+## 🛠️ Configuration
 
--   **`Config.Drugs`**: A table containing definitions for each drug.
-    -   **`label`**: The name of the drug.
-    -   **`ingredients`**: A table listing the required ingredients and their amounts.
-    -   **`output`**: A table defining the output item and amount.
-    -   **`enabled`**: A boolean indicating whether the drug is enabled.
-    -   **`sell`**: A table containing selling related configurations.
-        -   **`enabled`**: A boolean indicating whether selling is enabled for the drug.
-        -   **`price`**: The price per unit sold.
-        -   **`lawAlertChance`**: The chance to alert law enforcement when selling.
-    -   **`locations`**: A table containing the processing locations for the drug.
+All settings are managed in `config.lua`.
 
-    -   **`Config.Tools`**: A table containing configurations for tools.
-        -   **`pestleandmortar`**: Configuration for the pestle and mortar tool.
-            -   **`degrade`**: A boolean indicating whether the tool degrades with use.
-            -   **`loss`**: The amount of quality lost per use.
-            -   **`breakAt`**: The quality level at which the tool breaks.
-            -   **`defaultQuality`**: The starting quality of the tool.
+### 🔹 `Config.Drugs`
 
-## Usage
+Defines properties of each drug:
 
-1.  Gather the required ingredients for a drug.
-2.  Travel to a processing location defined in `config.lua`.
-3.  Use the appropriate interaction (e.g., through `ox_target`) to start processing the drug.
-4.  The system will check for the required ingredients, remove them from the player's inventory, and give the player the output item.
+- **`label`** — Display name  
+- **`ingredients`** — Required items and amounts (e.g., `{prairiepoppy = 3}`)  
+- **`output`** — Produced item and quantity  
+- **`enabled`** — Enable or disable the drug  
+- **`sell`** — Selling options:  
+  - `enabled` — Allow selling  
+  - `price` — Price per unit  
+  - `lawAlertChance` — Chance to alert law enforcement (0.0 to 1.0)  
+  - `minSellAmount`, `maxSellAmount` — Randomized amount per sale  
+- **`locations`** — Coordinates for processing zones (`vector3(...)`)  
 
-## Client Side
+### 🔹 `Config.Tools`
 
-The client side handles the following:
+Tool durability and degradation settings:
 
--   Displaying notifications to the player.
--   Handling drug processing zones.
--   Toggling drug selling mode with the `/drugsell` command.
--   Spawning drug buyer NPCs when selling is active.
+- `degrade` — Enable tool wear  
+- `loss` — Durability lost per use  
+- `breakAt` — Threshold to break the tool  
+- `defaultQuality` — Starting durability  
 
-## Server Side
+### 🔹 `Config.Selling`
 
-The server side handles the following:
+Global selling settings:
 
--   Processing drug requests from players.
--   Checking for required ingredients.
--   Removing ingredients from the player's inventory.
--   Giving the player the output item.
--   Handling drug selling logic.
--   Alerting law enforcement based on drug selling configuration.
+- `enabled` — Master toggle for selling system  
+- `interactionDistance` — Radius to detect NPCs  
+- `sellCooldown` — Cooldown between sales (ms)  
+- `maxNPCsNearby` — Max NPCs to consider  
+- `notifyPosition` — UI notification position  
+- `sellInteractionIcon` — Icon for selling interaction  
 
-## Dependencies
+### 🔹 `Config.LawAlerts`
 
--   RedM
--   `ox_lib`
--   `ox_target`
--   `rsg-inventory`
--   `rsg-core`
+Law enforcement alert behavior:
 
-## Installation
+- `enabled` — Master toggle for alerts  
+- `notify` — Show notification via `ox_lib`  
+- `blip` — Display blip at alert location  
+- `blipTime` — Blip duration in seconds  
+- `blipSprite`, `blipColor` — Customize blip appearance  
+- `notifyType` — Notification style (`inform`, `error`, etc.)  
+- `lawAlertMessage` — Default message for law alerts  
 
-1.  Place the `snake-drugs` resource folder in your server's resources directory.
-2.  Add `ensure snake-drugs` to your server's `server.cfg` file.
-3.  Configure the drugs and processing locations in `config.lua`.
-4.  Ensure that `ox_lib`, `ox_target`, `rsg-inventory`, and `rsg-core` are installed and running on your server.
+---
 
-## Credits
+## 👤 Client Side
 
--   This resource was created by \[Snake].
+- Creates processing zones with `ox_target`  
+- Handles `/drugsell` command to toggle selling mode  
+- Detects nearby NPCs and manages selling interactions  
+- Displays notifications and law enforcement alert blips  
 
-## License
+---
 
-This resource is licensed under the MIT License.
+## 🧠 Server Side
+
+- Validates processing and manages item exchanges  
+- Controls selling logic and cooldowns  
+- Triggers law enforcement alerts  
+- Manages item durability and tool quality  
+
+---
+
+## 📚 Usage
+
+1. Collect required ingredients.  
+2. Visit processing locations (`Config.Drugs[*].locations`).  
+3. Interact to process drugs.  
+4. Use `/drugsell` to start selling to nearby NPCs.  
+5. NPCs buy drugs in randomized amounts with cooldowns.  
+6. Sales may trigger law enforcement alerts (if enabled).  
+
+---
+
+## 🔗 Dependencies
+
+Make sure the following resources are installed and running before `snake-drugs`:
+
+- [`ox_lib`](https://overextended.dev/)  
+- [`ox_target`](https://overextended.dev/)  
+- `rsg-inventory`  
+- `rsg-core`  
+
+---
+
+## 🧰 Installation
+
+1. Place the `snake-drugs` folder inside your `resources` directory.  
+2. Add `ensure snake-drugs` to your `server.cfg`.  
+3. Configure settings via `config.lua`.  
+4. Verify all dependencies are running properly.  
+
+---
+
+## 👑 Credits
+
+Developed by **[Snake]**
+
+---
+
+## 📄 License
+
+This project is licensed under the [MIT License](https://opensource.org/licenses/MIT).

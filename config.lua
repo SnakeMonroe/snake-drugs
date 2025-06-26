@@ -5,7 +5,6 @@ Config.Drugs = {
         label = "Opium",
         ingredients = {
             prairiepoppy = 3,
-            -- pestleandmortar = 1, -- optional
         },
         output = {
             item = "opium",
@@ -14,17 +13,17 @@ Config.Drugs = {
         enabled = true,
 
         sell = {
-            enabled = true,            -- Enable/disable selling of this drug
-            price = 50,                -- Price per 1 unit sold
-            lawAlertChance = 1.00      -- 100% chance to alert law enforcement
+            enabled = true,
+            price = 50,
+            lawAlertChance = 1.00,
+            minSellAmount = 1,
+            maxSellAmount = 5
         },
 
         locations = {
             vector3(1419.35, 389.25, 89.7)
         }
     },
-
-    -- Add more drugs here...
 }
 
 Config.Tools = {
@@ -36,24 +35,53 @@ Config.Tools = {
     }
 }
 
--- Selling system general settings
+-- Selling system settings
 Config.Selling = {
-    enabled = true,                  -- Master toggle for the entire drug selling system
-    interactionDistance = 3.0,      -- Max distance to interact with NPCs for selling
-    sellCooldown = 5000,            -- Cooldown between sales in milliseconds
-    notifyPosition = 'top',         -- Notification position on screen
-    sellInteractionIcon = "fas fa-hand-holding-usd",  -- Icon for the sell interaction
-    maxNPCsNearby = 10,             -- Max NPCs considered around player for selling
+    enabled = true,
+    interactionDistance = 3.0,
+    sellCooldown = 5000,
+    notifyPosition = 'top',
+    sellInteractionIcon = "fas fa-hand-holding-usd",
+    maxNPCsNearby = 10,
+    requireDrugsInInventory = true,
+
+    startSellMessage = {
+        enabled = true,
+        title = "Selling Started",
+        description = "You are now selling.",
+        type = "inform",
+        position = "top"
+    },
+
+    declineRatio = 3,
+    declineNotification = {
+        enabled = true,
+        title = "Rejected",
+        description = "What? Are you crazy!?",
+        type = "error",
+        position = "top"
+    },
+
+    -- 👇 Rejection system configuration with 1 in 3 chance
+    rejection = {
+        enabled = true,              -- Enable NPC rejection logic
+        chance = 1 / 3,              -- 33.3% chance to reject (1 in 3)
+        notifyPlayer = true,         -- Show notify if rejected
+        rejectionNotifyPosition = 'top',
+        runAway = true,              -- NPC runs away if rejected
+        alertPolice = true           -- Police alerted on rejection
+    }
 }
 
--- Law enforcement alert configuration
+-- Law enforcement alert config
 Config.LawAlerts = {
-    enabled = true,             -- Master switch for law alerts
-    notify = true,              -- Use ox_lib to show on-screen notification to law players
-    blip = true,                -- Create a temporary map blip for law
-    blipTime = 30,              -- Duration in seconds for how long the blip stays
-    blipSprite = 161,           -- Blip sprite ID (161 is default skull)
-    blipColor = 1,              -- Blip color ID (1 = red)
-    notifyPosition = 'top',     -- Position of the notification (top, bottom, etc.)
-    notifyType = 'error'        -- Notification type (inform, error, success, etc.)
+    enabled = true,
+    notify = true,
+    blip = true,
+    blipTime = 30,
+    blipSprite = 161,
+    blipColor = 1,
+    notifyPosition = 'top',
+    notifyType = 'error',
+    lawAlertMessage = "Suspicious activity reported in the area."
 }
