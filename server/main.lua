@@ -1,4 +1,4 @@
--- Alert Cops when drug activity is detected
+-- GLOBAL: Alert cops when drug activity is detected
 function AlertCops(sellerSrc, item, amount)
     local ped = GetPlayerPed(sellerSrc)
     if not ped then return end
@@ -9,6 +9,8 @@ function AlertCops(sellerSrc, item, amount)
         if target and target.PlayerData.job then
             local jobName = target.PlayerData.job.name
             if jobName == "police" or jobName == "sheriff" then
+             
+                -- Alert notification
                 if Config.LawAlerts.notify then
                     TriggerClientEvent('snake-drugs:lawAlert', playerId, {
                         sellerSrc = sellerSrc,
@@ -20,6 +22,7 @@ function AlertCops(sellerSrc, item, amount)
                     })
                 end
 
+                -- Blip alert
                 if Config.LawAlerts.blip then
                     TriggerClientEvent('snake-drugs:blip', playerId, coords,
                         Config.LawAlerts.blipTime or 30,
@@ -33,7 +36,7 @@ function AlertCops(sellerSrc, item, amount)
     print(('[snake-drugs][ALERT] Law notified: %dx %s by player %d'):format(amount, item, sellerSrc))
 end
 
--- NPC Rejection Alert (triggered by client)
+-- NPC Rejection Alert (called from client)
 RegisterServerEvent('snake-drugs:alertPolice')
 AddEventHandler('snake-drugs:alertPolice', function(data)
     if not Config.LawAlerts.enabled or not data or not data.coords then return end
@@ -43,6 +46,8 @@ AddEventHandler('snake-drugs:alertPolice', function(data)
         if target and target.PlayerData.job then
             local job = target.PlayerData.job.name
             if job == "police" or job == "sheriff" then
+             
+                -- Text alert
                 if Config.LawAlerts.notify then
                     TriggerClientEvent('snake-drugs:lawAlert', playerId, {
                         coords = data.coords,
@@ -51,6 +56,7 @@ AddEventHandler('snake-drugs:alertPolice', function(data)
                     })
                 end
 
+                -- Blip alert
                 if Config.LawAlerts.blip then
                     TriggerClientEvent('snake-drugs:blip', playerId, data.coords,
                         Config.LawAlerts.blipTime or 30,
@@ -64,7 +70,7 @@ AddEventHandler('snake-drugs:alertPolice', function(data)
     print(('[snake-drugs][ALERT] NPC reported player for %s at %s'):format(data.drug or "unknown", json.encode(data.coords)))
 end)
 
--- Drug Processing
+-- Drug Processing Handler
 RegisterServerEvent('snake-drugs:processDrug')
 AddEventHandler('snake-drugs:processDrug', function(drugId)
     local src = source
@@ -112,6 +118,7 @@ AddEventHandler('snake-drugs:processDrug', function(drugId)
         end
     end
 
+    -- Tool degradation logic
     if pestleItem and Config.Tools.pestleandmortar.degrade then
         local info = pestleItem.info or {}
         local loss = Config.Tools.pestleandmortar.loss or 1
@@ -133,6 +140,7 @@ AddEventHandler('snake-drugs:processDrug', function(drugId)
         end
     end
 
+    -- Output
     player.Functions.AddItem(drug.output.item, drug.output.amount)
     TriggerClientEvent('ox_lib:notify', src, {
         title = 'Processing Complete',
@@ -144,7 +152,7 @@ AddEventHandler('snake-drugs:processDrug', function(drugId)
     print(('[snake-drugs] Player %d processed %dx %s'):format(src, drug.output.amount, drug.label))
 end)
 
--- Sell Drugs
+-- Sell Drugs with rejection logic
 RegisterServerEvent('snake-drugs:sellDrugs')
 AddEventHandler('snake-drugs:sellDrugs', function()
     local src = source
@@ -168,49 +176,58 @@ AddEventHandler('snake-drugs:sellDrugs', function()
     for drugId, drug in pairs(Config.Drugs) do
         if drug.enabled and drug.sell and drug.sell.enabled then
             for slot, item in pairs(items) do
-                if item.name == drug.output.item and (item.amount or 0) > 0 then
-                    if Config.Selling.rejection.enabled and math.random() < (Config.Selling.rejection.chance or 0) then
-                        if Config.Selling.rejection.notifyPlayer then
-                            TriggerClientEvent('ox_lib:notify', src, {
-                                title = Config.Selling.declineNotification.title,
-                                description = Config.Selling.declineNotification.description,
-                                type = Config.Selling.declineNotification.type,
-                                position = Config.Selling.declineNotification.position
-                            })
-                        end
-
-                        if Config.Selling.rejection.runAway then
-                            TriggerClientEvent('snake-drugs:npcRunAway', src)
-                        end
-
-                        if Config.Selling.rejection.alertPolice and Config.LawAlerts.enabled then
-                            local ped = GetPlayerPed(src)
-                            if ped then
-                                local coords = GetEntityCoords(ped)
-                                TriggerEvent('snake-drugs:alertPolice', { coords = coords, drug = item.name })
+                if item.name == drug.output.item then
+                    local available = item.amount or 0
+                    if available > 0 then
+                        -- Handle rejection chance first
+                        if Config.Selling.rejection.enabled then
+                            local rejectionChance = Config.Selling.rejection.chance or 0
+                            if math.random() < rejectionChance then
+                                -- Notify rejection
+                                if Config.Selling.rejection.notifyPlayer then
+                                    TriggerClientEvent('ox_lib:notify', src, {
+                                        title = Config.Selling.declineNotification.title,
+                                        description = Config.Selling.declineNotification.description,
+                                        type = Config.Selling.declineNotification.type,
+                                        position = Config.Selling.declineNotification.position
+                                    })
+                                end
+                                -- NPC runs away
+                                if Config.Selling.rejection.runAway then
+                                    TriggerClientEvent('snake-drugs:npcRunAway', src)
+                                end
+                                -- Alert police
+                                if Config.Selling.rejection.alertPolice and Config.LawAlerts.enabled then
+                                    local ped = GetPlayerPed(src)
+                                    if ped then
+                                        local coords = GetEntityCoords(ped)
+                                        TriggerEvent('snake-drugs:alertPolice', { coords = coords, drug = item.name })
+                                    end
+                                end
+                                -- Stop selling attempt on rejection
+                                return
                             end
                         end
-                        return
+
+                        local amountToSell = math.random(drug.sell.minSellAmount or 1, drug.sell.maxSellAmount or 5)
+                        amountToSell = math.min(amountToSell, available)
+                        local price = drug.sell.price or 10
+                        local payment = price * amountToSell
+
+                        player.Functions.RemoveItem(item.name, amountToSell)
+                        player.Functions.AddMoney("cash", payment)
+
+                        totalSold = totalSold + amountToSell
+                        totalEarned = totalEarned + payment
+
+                        print(('[snake-drugs] Player %d sold %dx %s for $%d'):format(src, amountToSell, item.name, payment))
+
+                        -- Random law alert chance
+                        if Config.LawAlerts.enabled and not alertedLaw and math.random() <= (drug.sell.lawAlertChance or 0) then
+                            alertedLaw = true
+                            AlertCops(src, item.name, amountToSell)
+                        end
                     end
-
-                    local amountToSell = math.random(drug.sell.minSellAmount or 1, drug.sell.maxSellAmount or 5)
-                    amountToSell = math.min(amountToSell, item.amount)
-                    local price = drug.sell.price or 10
-                    local payment = price * amountToSell
-
-                    player.Functions.RemoveItem(item.name, amountToSell)
-                    player.Functions.AddMoney("cash", payment)
-
-                    totalSold = totalSold + amountToSell
-                    totalEarned = totalEarned + payment
-
-                    print(('[snake-drugs] Player %d sold %dx %s for $%d'):format(src, amountToSell, item.name, payment))
-
-                    if Config.LawAlerts.enabled and not alertedLaw and math.random() <= (drug.sell.lawAlertChance or 0) then
-                        alertedLaw = true
-                        AlertCops(src, item.name, amountToSell)
-                    end
-
                     break
                 end
             end
@@ -234,63 +251,27 @@ AddEventHandler('snake-drugs:sellDrugs', function()
     end
 end)
 
--- Custom Opium Usage Handler (supports rsg-inventory and degradation)
-RegisterServerEvent('snake-drugs:useOpium')
-AddEventHandler('snake-drugs:useOpium', function()
+-- Check if player has sellable drugs (Client callback)
+RegisterServerEvent('snake-drugs:hasDrugsToSell')
+AddEventHandler('snake-drugs:hasDrugsToSell', function()
     local src = source
-    local inventory = exports['rsg-inventory']
-    local player = inventory:GetPlayer(src)
+    local player = exports['rsg-inventory']:GetPlayer(src)
     if not player then return end
 
     local items = player.PlayerData.items or {}
-    local pipeSlot, pipeItem
+    local hasDrugs = false
 
-    -- Find opium pipe
-    for slot, item in pairs(items) do
-        if item.name == 'opium_pipe' then
-            pipeSlot = slot
-            pipeItem = item
-            break
+    for _, drug in pairs(Config.Drugs) do
+        if drug.enabled and drug.sell and drug.sell.enabled then
+            for _, item in pairs(items) do
+                if item.name == drug.output.item and (item.amount or 0) > 0 then
+                    hasDrugs = true
+                    break
+                end
+            end
         end
+        if hasDrugs then break end
     end
 
-    -- Require pipe
-    if not pipeItem then
-        TriggerClientEvent('snake-drugs:opiumResult', src, false, 'missing_pipe')
-        return
-    end
-
-    -- Require opium
-    if not inventory:HasItem(src, 'opium', 1) then
-        TriggerClientEvent('snake-drugs:opiumResult', src, false, 'missing_opium')
-        return
-    end
-
-    -- Consume opium
-    inventory:RemoveItem(src, 'opium', 1)
-
-    -- Degrade pipe
-    if Config.Tools.opium_pipe and Config.Tools.opium_pipe.degrade then
-        local info = pipeItem.info or {}
-        local loss = Config.Tools.opium_pipe.loss or 1
-        local breakAt = Config.Tools.opium_pipe.breakAt or 0
-        local defaultQuality = Config.Tools.opium_pipe.defaultQuality or 100
-
-        info.quality = (info.quality or defaultQuality) - loss
-        inventory:RemoveItem(src, 'opium_pipe', 1, pipeSlot)
-
-        if info.quality <= breakAt then
-            TriggerClientEvent('ox_lib:notify', src, {
-                title = 'Item Broke',
-                description = 'Your opium pipe broke.',
-                type = 'error',
-                position = Config.Selling.notifyPosition
-            })
-        else
-            inventory:AddItem(src, 'opium_pipe', 1, nil, info)
-        end
-    end
-
-    TriggerClientEvent('snake-drugs:opiumResult', src, true)
-    print(('[snake-drugs] Player %d used opium.'):format(src))
+    TriggerClientEvent('snake-drugs:hasDrugsResponse', src, hasDrugs)
 end)
