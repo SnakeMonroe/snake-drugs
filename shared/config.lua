@@ -23,7 +23,8 @@ Config.Drugs = {
             price = 50,
             lawAlertChance = 1.00, -- 100% chance to alert law enforcement
             minSellAmount = 1,
-            maxSellAmount = 5
+            maxSellAmount = 5,
+            repGain = 5 -- Reputation gained per successful sale
         },
 
         -- Usage effects when consuming opium
@@ -111,4 +112,43 @@ Config.LawAlerts = {
     notifyPosition = 'top',
     notifyType = 'error',
     lawAlertMessage = "Suspicious activity reported in the area."
+}
+
+-- REPUTATION SYSTEM
+Config.Reputation = {
+    decayDays = 1, -- If the player hasn't sold in X days, reputation starts decaying
+    decayAmount = 10, -- Amount of rep lost per decay tick
+
+    tiers = {
+        [1] = {
+            name = "Runner",
+            minRep = 0,
+            maxRep = 200,
+            chances = { high = 0.15, mid = 0.20, low = 0.65 }
+        },
+        [2] = {
+            name = "Street Collector",
+            minRep = 201,
+            maxRep = 600,
+            chances = { high = 0.20, mid = 0.25, low = 0.55 }
+        },
+        [3] = {
+            name = "Associate",
+            minRep = 601,
+            maxRep = 1000,
+            chances = { high = 0.25, mid = 0.30, low = 0.45 }
+        },
+        [4] = {
+            name = "Cartel Member",
+            minRep = 1001,
+            maxRep = 1500,
+            chances = { high = 0.30, mid = 0.35, low = 0.35 }
+        },
+        [5] = {
+            name = "Drug Baron",
+            minRep = 1500,
+            maxRep = 2000,
+            chances = { high = 0.35, mid = 0.40, low = 0.25 }
+        }
+    }
 }

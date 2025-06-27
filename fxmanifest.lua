@@ -8,7 +8,7 @@ author 'Snake'
 description 'Snake Drugs - Core Drug System for RSG'
 version '1.0.0'
 
--- Dependencies used
+-- Dependencies
 dependencies {
     'rsg-core',
     'rsg-inventory',
@@ -16,21 +16,23 @@ dependencies {
     'ox_target'
 }
 
--- Shared scripts for both client and server
+-- Shared configs
 shared_scripts {
     '@ox_lib/init.lua',
     '@rsg-core/shared/items.lua',
     'shared/config.lua'
 }
 
--- Client-side scripts
+-- Client-side
 client_scripts {
     'client/sell.lua',
-    'client/use.lua'
+    'client/use.lua',
+    'client/reputation.lua'
 }
 
--- Server-side scripts
+-- Server-side
 server_scripts {
     'server/sell.lua',
-    'server/use.lua'
+    'server/use.lua',
+    'server/reputation.lua'
 }

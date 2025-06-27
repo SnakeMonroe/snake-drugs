@@ -46,6 +46,26 @@ RegisterNetEvent('snake-drugs:hasDrugsResponse', function(result)
     end
 end)
 
+-- Notify player of reputation gained after a successful sale
+RegisterNetEvent('snake-drugs:repGained', function(amount, newRep, tierName)
+    TriggerEvent('ox_lib:notify', {
+        title = "Reputation Gained",
+        description = ("You gained %d reputation points!\nCurrent Tier: %s (%d)"):format(amount, tierName, newRep),
+        type = "success",
+        position = Config.Selling.notifyPosition or 'top'
+    })
+end)
+
+-- Notify player of sale result (price etc.)
+RegisterNetEvent('snake-drugs:saleResult', function(price)
+    TriggerEvent('ox_lib:notify', {
+        title = "Sale Successful",
+        description = ("You sold drugs for $%d"):format(price),
+        type = "inform",
+        position = Config.Selling.notifyPosition or 'top'
+    })
+end)
+
 -- Check if player has drugs to sell
 function HasDrugsToSell(cb)
     hasDrugsCallback = cb
