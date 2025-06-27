@@ -2,7 +2,7 @@
 
 ## 📦 Description
 
-A modular and configurable drug system for RedM that enables players to gather, process, and sell drugs like Opium. Designed for easy expansion and seamless integration with major frameworks.
+A modular and configurable drug system for RedM that enables players to gather, process, use, and sell drugs like Opium. Designed for easy expansion and seamless integration with major frameworks.
 
 ---
 
@@ -10,6 +10,7 @@ A modular and configurable drug system for RedM that enables players to gather, 
 
 - 🔬 Ingredient-based drug crafting  
 - 🧪 Configurable processing zones with `ox_target`  
+- 💊 Drug usage with effects - find out what these will do to your body  
 - 💸 Drug selling system with cooldowns and NPC interaction  
 - 🚨 Law enforcement alerts with blips and notifications  
 - ⚙️ Tool degradation and durability system  
@@ -74,6 +75,7 @@ Law enforcement alert behavior:
 - Creates processing zones with `ox_target`  
 - Handles `/drugsell` command to toggle selling mode  
 - Detects nearby NPCs and manages selling interactions  
+- Applies drug usage effects including animations, healing, stumble, movement slow, and screen effects  
 - Displays notifications and law enforcement alert blips  
 
 ---
@@ -93,8 +95,9 @@ Law enforcement alert behavior:
 2. Visit processing locations (`Config.Drugs[*].locations`).  
 3. Interact to process drugs.  
 4. Use `/drugsell` to start selling to nearby NPCs.  
-5. NPCs buy drugs in randomized amounts with cooldowns.  
-6. Sales may trigger law enforcement alerts (if enabled).  
+5. Use drugs to experience effects like healing, stumble, and visual overlays.  
+6. NPCs buy drugs in randomized amounts with cooldowns.  
+7. Sales may trigger law enforcement alerts (if enabled).  
 
 ---
 
